@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เกมดนตรี ป.5 | บ้านคลอง 14</title>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d1a;
+    --surface: #161628;
+    --surface2: #1e1e38;
+    --c1: #a78bfa;
+    --c2: #56cfff;
+    --text: #f0eeff;
+    --text-muted: #8b8aaa;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Mitr',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(247,201,72,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 15%, rgba(78,205,196,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 80%, rgba(167,139,250,0.3) 0%, transparent 100%);
+    pointer-events:none; z-index:0;
+  }
+  .screen { position:relative; z-index:1; display:none; }
+  .screen.active { display:flex; }
+
+  /* HOME */
+  #home {
+    flex-direction:column; align-items:center; justify-content:center;
+    min-height:100vh; padding:1.5rem; gap:1.5rem;
+  }
+  .logo-area { text-align:center; animation:floatIn .8s ease both; }
+  .logo-icon { font-size:3.5rem; display:block; margin-bottom:.4rem; animation:float 4s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-8px) rotate(3deg)} }
+  @keyframes floatIn { from{opacity:0;transform:translateY(-25px)} to{opacity:1;transform:translateY(0)} }
+  .grade-badge {
+    display:inline-block;
+    background:linear-gradient(135deg,var(--c1),var(--c2));
+    color:#0d0d1a; font-weight:700; font-size:1rem;
+    padding:.25rem 1rem; border-radius:100px; margin-bottom:.5rem;
+  }
+  .logo-area h1 {
+    font-size:clamp(1.4rem,5vw,2.4rem); font-weight:700;
+    background:linear-gradient(135deg,var(--c1),var(--c2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .logo-area .subtitle { font-size:.85rem; color:var(--text-muted); margin-top:.3rem; font-family:'Sarabun',sans-serif; }
+  .categories-grid {
+    display:grid; grid-template-columns:repeat(2,1fr); gap:.9rem;
+    width:100%; max-width:600px; animation:floatIn .8s .2s ease both;
+  }
+  .cat-card {
+    background:var(--surface); border:2px solid transparent;
+    border-radius:1.2rem; padding:1.2rem .9rem; text-align:center;
+    cursor:pointer; transition:all .3s ease; position:relative; overflow:hidden;
+  }
+  .cat-card:nth-child(1) { border-color:rgba(247,201,72,.3); }
+  .cat-card:nth-child(1):hover { border-color:#f7c948; box-shadow:0 8px 28px rgba(247,201,72,.25); transform:translateY(-4px); }
+  .cat-card:nth-child(2) { border-color:rgba(255,107,107,.3); }
+  .cat-card:nth-child(2):hover { border-color:#ff6b6b; box-shadow:0 8px 28px rgba(255,107,107,.25); transform:translateY(-4px); }
+  .cat-card:nth-child(3) { border-color:rgba(78,205,196,.3); }
+  .cat-card:nth-child(3):hover { border-color:#4ecdc4; box-shadow:0 8px 28px rgba(78,205,196,.25); transform:translateY(-4px); }
+  .cat-card:nth-child(4) { border-color:rgba(167,139,250,.3); }
+  .cat-card:nth-child(4):hover { border-color:#a78bfa; box-shadow:0 8px 28px rgba(167,139,250,.25); transform:translateY(-4px); }
+  .cat-icon { font-size:2rem; display:block; margin-bottom:.4rem; }
+  .cat-name { font-size:.9rem; font-weight:600; line-height:1.3; }
+  .cat-count { font-size:.72rem; color:var(--text-muted); margin-top:.2rem; }
+  .btn-all {
+    background:linear-gradient(135deg,var(--c1),var(--c2));
+    color:#0d0d1a; border:none; padding:.85rem 2.5rem;
+    border-radius:100px; font-size:1rem; font-family:'Mitr',sans-serif;
+    font-weight:600; cursor:pointer; transition:all .3s;
+    animation:floatIn .8s .4s ease both;
+  }
+  .btn-all:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(247,201,72,.35); }
+  .nav-grades {
+    display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center;
+    max-width:600px; animation:floatIn .8s .5s ease both;
+  }
+  .nav-link {
+    background:var(--surface); border:1px solid rgba(255,255,255,.1);
+    color:var(--text-muted); padding:.35rem .85rem; border-radius:100px;
+    font-size:.78rem; cursor:pointer; text-decoration:none;
+    transition:all .2s; font-family:'Mitr',sans-serif;
+  }
+  .nav-link.active { background:linear-gradient(135deg,var(--c1),var(--c2)); color:#0d0d1a; font-weight:700; border-color:transparent; }
+  .nav-link:hover:not(.active) { border-color:rgba(255,255,255,.3); color:var(--text); }
+
+  /* QUIZ */
+  #quiz {
+    flex-direction:column; min-height:100vh;
+    padding:1.2rem; gap:1rem; max-width:680px; margin:0 auto; width:100%;
+  }
+  .quiz-header { display:flex; align-items:center; justify-content:space-between; gap:.8rem; }
+  .btn-back {
+    background:var(--surface); border:1px solid rgba(255,255,255,.1);
+    color:var(--text); width:2.3rem; height:2.3rem; border-radius:50%;
+    font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:all .2s; flex-shrink:0;
+  }
+  .btn-back:hover { background:var(--surface2); }
+  .quiz-meta { flex:1; text-align:center; }
+  .quiz-cat-label { font-size:.75rem; color:var(--text-muted); font-family:'Sarabun',sans-serif; }
+  .quiz-counter { font-size:.95rem; font-weight:600; }
+  .score-badge {
+    background:var(--surface); border:1px solid rgba(255,255,255,.1);
+    border-radius:100px; padding:.25rem .8rem; font-size:.82rem; font-weight:600;
+  }
+  .progress-bar-wrap { background:var(--surface); border-radius:100px; height:7px; overflow:hidden; }
+  .progress-bar-fill {
+    height:100%; border-radius:100px;
+    background:linear-gradient(90deg,var(--c1),var(--c2));
+    transition:width .5s cubic-bezier(.4,0,.2,1);
+  }
+  .question-card {
+    background:var(--surface); border-radius:1.4rem; padding:1.5rem;
+    border:1px solid rgba(255,255,255,.07); position:relative; overflow:hidden;
+  }
+  .question-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:1.4rem 1.4rem 0 0;
+  }
+  .qc1::before { background:linear-gradient(90deg,#f7c948,transparent); }
+  .qc2::before { background:linear-gradient(90deg,#ff6b6b,transparent); }
+  .qc3::before { background:linear-gradient(90deg,#4ecdc4,transparent); }
+  .qc4::before { background:linear-gradient(90deg,#a78bfa,transparent); }
+  .question-emoji { font-size:1.9rem; display:block; margin-bottom:.5rem; }
+  .question-num { font-size:.72rem; color:var(--text-muted); margin-bottom:.4rem; font-family:'Sarabun',sans-serif; }
+  .question-text { font-size:clamp(.95rem,2.8vw,1.15rem); font-weight:500; line-height:1.6; }
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
+  @media(max-width:440px) { .choices { grid-template-columns:1fr; } }
+  .choice-btn {
+    background:var(--surface); border:2px solid rgba(255,255,255,.1); color:var(--text);
+    padding:.8rem .9rem; border-radius:.9rem; font-family:'Mitr',sans-serif; font-size:.87rem;
+    cursor:pointer; text-align:left; transition:all .2s;
+    display:flex; align-items:center; gap:.55rem; line-height:1.4;
+  }
+  .choice-btn:hover:not(:disabled) { background:var(--surface2); border-color:rgba(255,255,255,.25); transform:translateX(3px); }
+  .choice-label {
+    width:1.55rem; height:1.55rem; border-radius:50%; background:var(--surface2);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.72rem; font-weight:700; flex-shrink:0; transition:all .2s;
+  }
+  .choice-btn.correct { background:rgba(78,205,100,.18); border-color:#4ecd64; color:#7ee89a; }
+  .choice-btn.correct .choice-label { background:#4ecd64; color:#0d0d1a; }
+  .choice-btn.wrong { background:rgba(255,107,107,.13); border-color:rgba(255,107,107,.5); color:rgba(255,107,107,.85); }
+  .choice-btn.wrong .choice-label { background:rgba(255,107,107,.5); }
+  .choice-btn:disabled { cursor:default; }
+  @keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .feedback-bar {
+    padding:.9rem 1.1rem; border-radius:.9rem; font-size:.9rem; font-weight:500;
+    display:none; align-items:center; gap:.65rem; animation:slideUp .3s ease;
+  }
+  .feedback-bar.show { display:flex; }
+  .correct-fb { background:rgba(78,205,100,.13); border:1px solid rgba(78,205,100,.3); color:#7ee89a; }
+  .wrong-fb { background:rgba(255,107,107,.1); border:1px solid rgba(255,107,107,.23); color:#ff9999; }
+  .feedback-icon { font-size:1.3rem; }
+  .feedback-explanation { font-family:'Sarabun',sans-serif; font-size:.82rem; color:var(--text-muted); margin-top:.2rem; }
+  .btn-next {
+    background:linear-gradient(135deg,var(--c1),var(--c2)); color:#0d0d1a;
+    border:none; padding:.85rem; border-radius:.9rem; font-size:.95rem;
+    font-family:'Mitr',sans-serif; font-weight:600; cursor:pointer;
+    transition:all .3s; display:none; width:100%;
+  }
+  .btn-next.show { display:block; }
+  .btn-next:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(247,201,72,.3); }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  .shake { animation:shake .35s ease; }
+
+  /* RESULT */
+  #result {
+    flex-direction:column; align-items:center; justify-content:center;
+    min-height:100vh; padding:1.5rem; gap:1.2rem;
+    max-width:560px; margin:0 auto; width:100%;
+  }
+  .result-trophy { font-size:4.5rem; animation:bounce .6s ease; }
+  @keyframes bounce { 0%{transform:scale(0)} 60%{transform:scale(1.15)} 80%{transform:scale(.95)} 100%{transform:scale(1)} }
+  .result-title {
+    font-size:clamp(1.5rem,5vw,2.2rem); font-weight:700; text-align:center;
+    background:linear-gradient(135deg,var(--c1),var(--c2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .result-score-ring { position:relative; width:130px; height:130px; }
+  .result-score-ring svg { transform:rotate(-90deg); }
+  .ring-bg { fill:none; stroke:var(--surface2); stroke-width:8; }
+  .ring-fill { fill:none; stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+  .ring-text { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; }
+  .ring-num { font-size:1.9rem; line-height:1; }
+  .ring-denom { font-size:.75rem; color:var(--text-muted); }
+  .result-grade {
+    background:var(--surface); border-radius:1.3rem; padding:1.1rem 1.8rem;
+    text-align:center; border:1px solid rgba(255,255,255,.07); width:100%;
+  }
+  .grade-letter { font-size:1.9rem; font-weight:700; }
+  .grade-msg { font-family:'Sarabun',sans-serif; color:var(--text-muted); font-size:.88rem; margin-top:.25rem; }
+  .result-actions { display:flex; gap:.65rem; width:100%; flex-wrap:wrap; }
+  .btn-secondary {
+    flex:1; min-width:110px; background:var(--surface);
+    border:1px solid rgba(255,255,255,.12); color:var(--text);
+    padding:.75rem; border-radius:.9rem; font-family:'Mitr',sans-serif;
+    font-size:.88rem; cursor:pointer; transition:all .2s;
+  }
+  .btn-secondary:hover { background:var(--surface2); }
+  .btn-primary {
+    flex:1; min-width:110px;
+    background:linear-gradient(135deg,var(--c1),var(--c2));
+    border:none; color:#0d0d1a; padding:.75rem; border-radius:.9rem;
+    font-family:'Mitr',sans-serif; font-size:.88rem; font-weight:600;
+    cursor:pointer; transition:all .2s;
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(247,201,72,.3); }
+  .confetti-piece {
+    position:fixed; width:8px; height:11px; border-radius:2px; top:-20px;
+    animation:confettiFall linear forwards; z-index:999; pointer-events:none;
+  }
+  @keyframes confettiFall { to{transform:translateY(110vh) rotate(720deg); opacity:0;} }
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home" class="screen active">
+  <div class="logo-area">
+    <span class="logo-icon">🎵</span>
+    <div class="grade-badge">ป.5</div>
+    <h1>เกมดนตรี ป.5</h1>
+    <p class="subtitle">โรงเรียนบ้านคลอง 14 · สพป.นครนายก</p>
+  </div>
+
+  <div class="categories-grid">
+    <div class="cat-card" onclick="startQuiz('1')"><span class="cat-icon">🎼</span><div class="cat-name">ทฤษฎีดนตรีระดับกลาง</div><div class="cat-count">5 ข้อ</div></div>
+    <div class="cat-card" onclick="startQuiz('2')"><span class="cat-icon">🥁</span><div class="cat-name">ดนตรีสากลและประวัติ</div><div class="cat-count">5 ข้อ</div></div>
+    <div class="cat-card" onclick="startQuiz('3')"><span class="cat-icon">🎸</span><div class="cat-name">การฟังและวิเคราะห์</div><div class="cat-count">5 ข้อ</div></div>
+    <div class="cat-card" onclick="startQuiz('4')"><span class="cat-icon">🎵</span><div class="cat-name">การสร้างสรรค์ดนตรี</div><div class="cat-count">5 ข้อ</div></div>
+  </div>
+
+  <button class="btn-all" onclick="startQuiz('all')">🎮 เล่นทั้งหมด (20 ข้อ)</button>
+
+  <div class="nav-grades">
+    <a class="nav-link " href="music_quiz_p1.html">ป.1</a>
+    <a class="nav-link " href="music_quiz_p2.html">ป.2</a>
+    <a class="nav-link " href="music_quiz_p3.html">ป.3</a>
+    <a class="nav-link " href="music_quiz_p4.html">ป.4</a>
+    <a class="nav-link active" href="music_quiz_p5.html">ป.5</a>
+    <a class="nav-link " href="music_quiz_p6.html">ป.6</a>
+    <a class="nav-link " href="music_quiz_m1.html">ม.1</a>
+    <a class="nav-link " href="music_quiz_m2.html">ม.2</a>
+    <a class="nav-link " href="music_quiz_m3.html">ม.3</a>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="quiz-header">
+    <button class="btn-back" onclick="goHome()">←</button>
+    <div class="quiz-meta">
+      <div class="quiz-cat-label" id="catLabel"></div>
+      <div class="quiz-counter" id="questionCounter">ข้อ 1 / 10</div>
+    </div>
+    <div class="score-badge" id="scoreBadge">⭐ 0</div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+  <div class="question-card qc1" id="questionCard">
+    <span class="question-emoji" id="questionEmoji">🎵</span>
+    <div class="question-num" id="questionNum"></div>
+    <div class="question-text" id="questionText"></div>
+  </div>
+  <div class="choices" id="choices"></div>
+  <div class="feedback-bar" id="feedbackBar">
+    <span class="feedback-icon" id="feedbackIcon"></span>
+    <div><div id="feedbackText"></div><div class="feedback-explanation" id="feedbackExplain"></div></div>
+  </div>
+  <button class="btn-next" id="btnNext" onclick="nextQuestion()">ข้อต่อไป →</button>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-trophy" id="resultTrophy">🏆</div>
+  <div class="result-title" id="resultTitle">ยอดเยี่ยม!</div>
+  <div class="result-score-ring">
+    <svg width="130" height="130" viewBox="0 0 130 130">
+      <circle class="ring-bg" cx="65" cy="65" r="54"/>
+      <circle class="ring-fill" id="ringFill" cx="65" cy="65" r="54"
+        stroke="url(#rg)" stroke-dasharray="339.29" stroke-dashoffset="339.29"/>
+      <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#a78bfa"/>
+        <stop offset="100%" stop-color="#56cfff"/>
+      </linearGradient></defs>
+    </svg>
+    <div class="ring-text"><span class="ring-num" id="ringNum">0</span><span class="ring-denom" id="ringDenom">/10</span></div>
+  </div>
+  <div class="result-grade" id="resultGrade">
+    <div class="grade-letter" id="gradeLetter">A</div>
+    <div class="grade-msg" id="gradeMsg"></div>
+  </div>
+  <div class="result-actions">
+    <button class="btn-secondary" onclick="replayQuiz()">🔄 เล่นอีกครั้ง</button>
+    <button class="btn-primary" onclick="goHome()">🏠 หน้าหลัก</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = {"1": [{"q": "Minor Scale ต่างจาก Major Scale อย่างไร?", "emoji": "🎵", "choices": ["จำนวนโน้ตต่างกัน", "ระยะห่างของโน้ตต่างกัน", "ความเร็วต่างกัน", "จำนวนห้องต่างกัน"], "ans": 1, "explain": "Minor Scale ต่างจาก Major ที่ระยะห่างของโน้ต ทำให้ความรู้สึกแตกต่างกัน"}, {"q": "Triad คือ Chord ที่มีกี่โน้ต?", "emoji": "🎸", "choices": ["2 โน้ต", "3 โน้ต", "4 โน้ต", "5 โน้ต"], "ans": 1, "explain": "Triad คือคอร์ดพื้นฐานที่มี 3 โน้ต ได้แก่ Root, Third, Fifth"}, {"q": "คีย์ C Major ไม่มี Sharp หรือ Flat เลย แสดงว่า?", "emoji": "🎹", "choices": ["เล่นยาก", "ใช้โน้ตขาวล้วน", "ต้องเล่นช้า", "เป็นคีย์ยาก"], "ans": 1, "explain": "C Major ไม่มี # หรือ b ในคีย์ซิกเนเจอร์ จึงเล่นด้วยโน้ตขาวทั้งหมดบนเปียโน"}, {"q": "Chromatic Scale คือ?", "emoji": "🎼", "choices": ["บันไดเสียง 5 เสียง", "บันไดเสียงครึ่งเสียงทุกตัว 12 เสียง", "บันไดเสียงไมเนอร์", "บันไดเสียง 7 เสียง"], "ans": 1, "explain": "Chromatic Scale มี 12 ครึ่งเสียงใน 1 Octave รวมทั้ง Sharp และ Flat"}, {"q": "Perfect Fifth คือ Interval ที่มีระยะห่างกี่ครึ่งเสียง?", "emoji": "📏", "choices": ["5", "6", "7", "8"], "ans": 2, "explain": "Perfect Fifth มีระยะห่าง 7 ครึ่งเสียง เช่น C-G เป็น Perfect Fifth"}], "2": [{"q": "บีโธเฟนแต่งซิมโฟนีหมายเลขใดทั้งที่หูหนวก?", "emoji": "🎼", "choices": ["ที่ 3", "ที่ 5", "ที่ 9", "ที่ 6"], "ans": 2, "explain": "ซิมโฟนีหมายเลข 9 ของบีโธเฟนแต่งขณะที่หูหนวกสนิท แต่ยังยิ่งใหญ่อยู่"}, {"q": "โมสาร์ทเริ่มแต่งเพลงตั้งแต่อายุเท่าไร?", "emoji": "👶", "choices": ["3 ขวบ", "5 ขวบ", "10 ขวบ", "15 ขวบ"], "ans": 1, "explain": "โมสาร์ทเริ่มแต่งเพลงตั้งแต่อายุ 5 ขวบ ถือเป็นอัจฉริยะดนตรีระดับโลก"}, {"q": "Baroque Period อยู่ในช่วงใด?", "emoji": "📜", "choices": ["ค.ศ. 1600-1750", "ค.ศ. 1750-1820", "ค.ศ. 1820-1900", "ค.ศ. 1900-ปัจจุบัน"], "ans": 0, "explain": "ยุค Baroque ประมาณ ค.ศ. 1600-1750 มีบาค เฮนเดล วิวาลดี เป็นนักประพันธ์สำคัญ"}, {"q": "Johann Sebastian Bach มีชื่อเสียงจากดนตรีประเภทใด?", "emoji": "🎼", "choices": ["ดนตรีป๊อป", "ดนตรีบาโรก", "ดนตรีร็อค", "ดนตรีแจ๊ส"], "ans": 1, "explain": "บาคเป็นนักประพันธ์ยุค Baroque ที่ยิ่งใหญ่ที่สุดคนหนึ่ง"}, {"q": "วงออเคสตรามีวาทยากร (Conductor) ทำหน้าที่อะไร?", "emoji": "🎻", "choices": ["เล่นดนตรี", "ควบคุมและนำวง", "ขาย Ticket", "แต่งเพลง"], "ans": 1, "explain": "วาทยากร (Conductor) ใช้ไม้บาตองนำและควบคุมการเล่นของนักดนตรีทั้งวง"}], "3": [{"q": "Form ABA ในดนตรีหมายถึง?", "emoji": "🔄", "choices": ["เล่น 3 รอบ", "มีสองส่วนสลับกัน", "มีส่วน A, B แล้วกลับมา A", "เล่นแบบอิสระ"], "ans": 2, "explain": "Form ABA หมายถึงมีส่วน A แล้วมีส่วน B ที่ต่างออกไป แล้วกลับมาส่วน A อีกครั้ง"}, {"q": "Dynamics ในดนตรีหมายถึง?", "emoji": "🔉", "choices": ["ความเร็ว", "ความดัง-เบา", "จังหวะ", "ทำนอง"], "ans": 1, "explain": "Dynamics คือการควบคุมความดังและความเบาในดนตรี เช่น pp, p, f, ff"}, {"q": "Texture ของดนตรีหมายถึง?", "emoji": "🧵", "choices": ["ความเร็ว", "การผสมผสานของเสียงต่าง ๆ", "ความดัง", "จังหวะ"], "ans": 1, "explain": "Texture หมายถึงลักษณะการรวมของเสียงต่าง ๆ เช่น Monophony, Polyphony"}, {"q": "Monophony หมายถึงดนตรีที่มีลักษณะใด?", "emoji": "🎤", "choices": ["หลายทำนองพร้อมกัน", "ทำนองเดียว", "เสียงประสาน", "จังหวะซับซ้อน"], "ans": 1, "explain": "Monophony คือดนตรีที่มีทำนองเดียว ไม่มีเสียงประกอบ"}, {"q": "Polyphony หมายถึง?", "emoji": "🎵", "choices": ["ทำนองเดียว", "หลายทำนองพร้อมกัน", "ไม่มีทำนอง", "ทำนองสั้น"], "ans": 1, "explain": "Polyphony คือดนตรีที่มีหลายทำนองดังพร้อมกันอย่างอิสระ เช่น Fugue ของบาค"}], "4": [{"q": "Arrangement คือ?", "emoji": "🎼", "choices": ["การแต่งเพลงใหม่", "การนำเพลงมาเรียบเรียงใหม่", "การร้องเพลง", "การฟังเพลง"], "ans": 1, "explain": "Arrangement คือการเรียบเรียงเพลงที่มีอยู่แล้วให้เหมาะกับวงดนตรีหรือสไตล์ใหม่"}, {"q": "ผู้เขียนบทเพลงเรียกว่า?", "emoji": "✍️", "choices": ["นักดนตรี", "นักร้อง", "นักประพันธ์เพลง (Composer)", "วาทยากร"], "ans": 2, "explain": "Composer หรือนักประพันธ์เพลง คือผู้สร้างสรรค์บทเพลงใหม่"}, {"q": "Motif ในดนตรีคือ?", "emoji": "🧩", "choices": ["เพลงทั้งเพลง", "กลุ่มโน้ตสั้น ๆ ที่เป็นหน่วยเล็กที่สุด", "จังหวะ", "ความดัง"], "ans": 1, "explain": "Motif คือกลุ่มโน้ตสั้น ๆ ที่เป็นหน่วยพื้นฐานของบทเพลง มักซ้ำตลอดเพลง"}, {"q": "Theme ในดนตรีหมายถึง?", "emoji": "🎵", "choices": ["ชื่อเพลง", "ทำนองหลักที่จดจำได้", "ความเร็ว", "จังหวะ"], "ans": 1, "explain": "Theme คือทำนองหลักที่เป็นเอกลักษณ์ของบทเพลง มักปรากฏซ้ำในรูปแบบต่าง ๆ"}, {"q": "Coda ในดนตรีหมายถึง?", "emoji": "🔚", "choices": ["ท่อนเปิด", "ท่อนจบของเพลง", "ท่อนกลาง", "ท่อนซ้ำ"], "ans": 1, "explain": "Coda คือส่วนจบของบทเพลง มาจากภาษาอิตาลีแปลว่า หาง"}]};
+const CAT_NAMES = {"1": "ทฤษฎีดนตรีระดับกลาง", "2": "ดนตรีสากลและประวัติ", "3": "การฟังและวิเคราะห์", "4": "การสร้างสรรค์ดนตรี"};
+const CAT_ACCENTS = {"1":"qc1","2":"qc2","3":"qc3","4":"qc4"};
+
+let currentQuestions=[],currentIndex=0,score=0,answered=false,currentCat="";
+
+function shuffle(arr){return[...arr].sort(()=>Math.random()-.5);}
+
+function startQuiz(cat){
+  currentCat=cat; score=0; currentIndex=0; answered=false;
+  if(cat==='all'){
+    let all=[];
+    Object.keys(QUESTIONS).forEach(c=>{all=all.concat(QUESTIONS[c].map(q=>(({...q,cat:c}))));});
+    currentQuestions=shuffle(all);
+  }else{
+    currentQuestions=shuffle(QUESTIONS[cat]).map(q=>(({...q,cat})));
+  }
+  showScreen('quiz'); renderQuestion();
+}
+
+function renderQuestion(){
+  const q=currentQuestions[currentIndex],total=currentQuestions.length,cat=q.cat;
+  document.getElementById('catLabel').textContent=CAT_NAMES[cat];
+  document.getElementById('questionCounter').textContent=`ข้อ ${currentIndex+1} / ${total}`;
+  document.getElementById('scoreBadge').textContent=`⭐ ${score}`;
+  document.getElementById('progressBar').style.width=`${(currentIndex/total)*100}%`;
+  const card=document.getElementById('questionCard');
+  card.className=`question-card ${CAT_ACCENTS[cat]}`;
+  document.getElementById('questionEmoji').textContent=q.emoji;
+  document.getElementById('questionNum').textContent=`หมวด: ${CAT_NAMES[cat]}`;
+  document.getElementById('questionText').textContent=q.q;
+  const labels=['ก','ข','ค','ง'],choicesEl=document.getElementById('choices');
+  choicesEl.innerHTML='';
+  q.choices.forEach((c,i)=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.innerHTML=`<span class="choice-label">${labels[i]}</span>${c}`;
+    btn.onclick=()=>selectAnswer(i);
+    choicesEl.appendChild(btn);
+  });
+  document.getElementById('feedbackBar').className='feedback-bar';
+  document.getElementById('btnNext').className='btn-next';
+  answered=false;
+}
+
+function selectAnswer(idx){
+  if(answered)return; answered=true;
+  const q=currentQuestions[currentIndex];
+  const btns=document.querySelectorAll('.choice-btn');
+  btns.forEach((btn,i)=>{
+    btn.disabled=true;
+    if(i===q.ans)btn.classList.add('correct');
+    else if(i===idx&&idx!==q.ans)btn.classList.add('wrong');
+  });
+  const correct=idx===q.ans;
+  if(correct){score++;document.getElementById('scoreBadge').textContent=`⭐ ${score}`;}
+  const fb=document.getElementById('feedbackBar');
+  fb.className=`feedback-bar ${correct?'correct-fb':'wrong-fb'} show`;
+  document.getElementById('feedbackIcon').textContent=correct?'✅':'❌';
+  document.getElementById('feedbackText').textContent=correct?'ถูกต้อง! เก่งมาก':`ผิด! คำตอบที่ถูกคือ "${q.choices[q.ans]}"`;
+  document.getElementById('feedbackExplain').textContent=q.explain;
+  if(!correct)btns[idx].classList.add('shake');
+  document.getElementById('btnNext').className='btn-next show';
+}
+
+function nextQuestion(){
+  currentIndex++;
+  if(currentIndex>=currentQuestions.length)showResult();
+  else renderQuestion();
+}
+
+function showResult(){
+  showScreen('result');
+  const total=currentQuestions.length,pct=score/total;
+  let trophy,title,grade,msg,color;
+  if(pct>=.9){trophy='🏆';title='ยอดเยี่ยมมาก!';grade='A';msg='เก่งมาก คุณเป็นนักดนตรีตัวยง!';color='#a78bfa';}
+  else if(pct>=.7){trophy='🥈';title='ดีมาก!';grade='B';msg='ทำได้ดี ลองทบทวนส่วนที่ผิดด้วยนะ';color='#56cfff';}
+  else if(pct>=.5){trophy='🥉';title='ผ่าน!';grade='C';msg='พอใช้ได้ ลองฝึกฝนอีกนะ';color='#a78bfa';}
+  else{trophy='📚';title='ลองใหม่!';grade='D';msg='ต้องทบทวนเพิ่มเติมอีกหน่อย';color='#ff6b6b';}
+  document.getElementById('resultTrophy').textContent=trophy;
+  document.getElementById('resultTitle').textContent=title;
+  document.getElementById('ringNum').textContent=score;
+  document.getElementById('ringDenom').textContent=`/ ${total}`;
+  document.getElementById('gradeLetter').textContent=grade;
+  document.getElementById('gradeLetter').style.color=color;
+  document.getElementById('gradeMsg').textContent=msg;
+  const circ=339.29,offset=circ-(pct*circ);
+  setTimeout(()=>document.getElementById('ringFill').style.strokeDashoffset=offset,300);
+  if(pct>=.7)spawnConfetti();
+}
+
+function spawnConfetti(){
+  const colors=['#a78bfa','#56cfff','#4ecdc4','#a78bfa','#fff'];
+  for(let i=0;i<55;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');
+      el.className='confetti-piece';
+      el.style.cssText=`left:${Math.random()*100}vw;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${2+Math.random()*2}s;animation-delay:${Math.random()*.5}s;transform:rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),4000);
+    },i*25);
+  }
+}
+
+function replayQuiz(){startQuiz(currentCat);}
+function goHome(){showScreen('home');}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+</script>
+</body>
+</html>
